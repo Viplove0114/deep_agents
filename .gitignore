@@ -1,0 +1,23 @@
+# Python-generated files
+__pycache__/
+*.py[oc]
+build/
+dist/
+wheels/
+*.egg-info
+
+# Virtual environments
+.venv
+venv/
+env/
+
+# Sensitive environment variables & secrets (NEVER commit to GitHub)
+.env
+.env.*
+.streamlit/secrets.toml
+
+# OS and IDE files
+.DS_Store
+Thumbs.db
+.vscode/
+.idea/
