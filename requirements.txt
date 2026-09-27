@@ -1,9 +1,28 @@
+# --- Core Agent Framework ---
 deepagents
 langchain
-langchain-openai
-langchain-groq
-ipykernel
-tavily-python
-python-dotenv
 langchain_quickjs
+
+# --- LLM Providers ---
+langchain-google-genai
+langchain-openrouter
+langchain-groq
+
+# --- Document Parsing ---
+pypdf
+python-docx
+
+# --- Document Export ---
+weasyprint
+markdown
+
+# --- Data Export ---
+openpyxl
+
+# --- Search & Web ---
+tavily-python
+
+# --- Utilities ---
+python-dotenv
 streamlit
+ipykernel

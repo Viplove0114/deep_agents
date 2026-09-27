@@ -1,18 +1,18 @@
-# ✦ Deep Agents — Autonomous Multi-Agent Conversational AI
+# ✦ Deep Agents — Career Intelligence & Multi-Agent AI Platform
 
 [![Streamlit App](https://static.streamlit.io/badges/streamlit_badge_black_white.svg)](https://viplove0114-deep-agents-app-bdkxjk.streamlit.app/)
 [![Python 3.11+](https://img.shields.io/badge/Python-3.11%2B-blue.svg?logo=python&logoColor=white)](https://www.python.org/)
 [![DeepAgents](https://img.shields.io/badge/Engine-DeepAgents%20%7C%20LangGraph-6366f1.svg)](https://github.com/langchain-ai/deepagents)
 [![Streamlit](https://img.shields.io/badge/UI-Streamlit-FF4B4B.svg?logo=streamlit&logoColor=white)](https://streamlit.io/)
-[![Groq](https://img.shields.io/badge/Model-Groq%20%7C%20OpenAI-f55036.svg)](https://groq.com/)
+[![Models](https://img.shields.io/badge/Models-Qwen%20%7C%20Gemini%20%7C%20Gemma-10b981.svg)](https://openrouter.ai/)
 [![License: MIT](https://img.shields.io/badge/License-MIT-yellow.svg)](LICENSE)
 
-> A production-grade, modular framework and modern conversational AI platform featuring multi-model orchestration, persistent graph checkpointers, pluggable storage backends, skills-based context engineering, and autonomous two-tier subagent delegation with Pydantic-structured outputs.
+> A production-grade, multi-agent AI platform with **dual operating modes**: a general-purpose conversational AI and a **Career Intelligence Suite** that tailors resumes to beat ATS systems, searches for jobs across 6+ platforms, and generates interview preparation — all orchestrated by specialised LLM agents with zero-hallucination protocols.
 
 ---
 
-### 🚀 Live Interactive Demo
-Try the deployed application directly on Streamlit Cloud:
+### 🚀 Live Demo
+
 👉 **[https://viplove0114-deep-agents-app-bdkxjk.streamlit.app/](https://viplove0114-deep-agents-app-bdkxjk.streamlit.app/)**
 
 ---
@@ -20,113 +20,141 @@ Try the deployed application directly on Streamlit Cloud:
 ## 📑 Table of Contents
 
 - [Overview](#-overview)
-- [Architecture & Design Highlights](#-architecture--design-highlights)
+- [Architecture](#-architecture)
 - [System Capabilities](#-system-capabilities)
-  - [1. Model Engine Selection](#1-model-engine-selection)
-  - [2. Context Engineering & Memory](#2-context-engineering--memory)
-  - [3. Pluggable Backends](#3-pluggable-backends)
-  - [4. Two-Tier Autonomous Subagents](#4-two-tier-autonomous-subagents)
-  - [5. Modern Conversational Web UI](#5-modern-conversational-web-ui)
+  - [General Chat Mode](#1-general-chat-mode)
+  - [Career Mode — Resume Tailor](#2-career-mode--resume-tailor)
+  - [Career Mode — Job Search](#3-career-mode--job-search)
+  - [Career Mode — Interview Coach](#4-career-mode--interview-coach)
+  - [Multi-Model Routing](#5-multi-model-routing)
 - [Project Layout](#-project-layout)
-- [Local Installation & Setup](#-local-installation--setup)
-- [Streamlit Cloud Deployment](#-streamlit-cloud-deployment)
-- [Notebook Experiments Reference](#-notebook-experiments-reference)
-- [License & Authors](#-license--authors)
+- [Local Setup](#-local-installation--setup)
+- [Cloud Deployment](#-streamlit-cloud-deployment)
+- [Career Mode Deep Dive](#-career-mode-deep-dive)
+- [Notebook Experiments](#-notebook-experiments-reference)
+- [License & Author](#-license--author)
 
 ---
 
 ## 🌟 Overview
 
-**Deep Agents** consolidates core agentic AI patterns—originally developed across experimental Jupyter notebooks—into a professional, modular Python package under `src/deep_agents/`. It couples these agent primitives with a sleek, state-of-the-art **Streamlit conversational AI web interface** inspired by modern AI products like ChatGPT, Claude, and Gemini.
+**Deep Agents** is a dual-mode AI platform built on [LangGraph](https://github.com/langchain-ai/langgraph):
 
-The system is designed from the ground up for **resilient multi-turn workflows**:
-- Delegates simple vs. complex queries dynamically between **Light** and **Deep Structured Research** subagents.
-- Executes real-time web searches using the **Tavily API**.
-- Preserves multi-turn state and threads using **LangGraph MemorySaver** checkpointers.
-- Mounts virtual filesystems, loads custom **`AGENTS.md`** operating manuals, and injects on-demand **Skills** from disk.
+| Mode | Purpose |
+|---|---|
+| **💬 General Chat** | Multi-model conversational AI with research subagents, web search, virtual filesystems, and persistent memory |
+| **📄 Resume Tailor** | Upload resume + paste JD → ATS-optimised tailored resume with match score, PDF/DOCX export |
+| **🔍 Job Search** | Search LinkedIn, Naukri, Indeed, Greenhouse, Lever for jobs posted in the last 3 days |
+
+### What makes it different?
+
+- **5 specialised career subagents** — each with a dedicated LLM and structured Pydantic output
+- **Smart model routing** — the right LLM for each task (parsing, analysis, rewriting, coding, judging)
+- **Zero-hallucination protocol** — 7 non-negotiable rules enforced by a Quality Judge subagent
+- **ATS-optimised templates** — single-column, Calibri 11pt, Google XYZ bullet format
+- **Professional modular codebase** — enterprise-grade package structure under `src/deep_agents/`
 
 ---
 
-## 🏛️ Architecture & Design Highlights
+## 🏛️ Architecture
 
 ```
-                       ┌─────────────────────────────────────┐
-                       │     Streamlit Modern Web App        │
-                       │             (app.py)                │
-                       └──────────────────┬──────────────────┘
-                                          │ User Query & Sidebar Controls
-                                          ▼
-                       ┌─────────────────────────────────────┐
-                       │     Unified Agent Factory           │
-                       │    (create_agent_instance)          │
-                       └──────────┬──────────────────────────┘
-                                  │
-         ┌────────────────────────┼─────────────────────────┐
-         │                        │                         │
-         ▼                        ▼                         ▼
-┌──────────────────┐    ┌──────────────────┐     ┌──────────────────┐
-│  Model Engine    │    │ Context & Memory │     │ Pluggable Storage│
-│ • Qwen 3.8-27B   │    │ • System Prompts │     │ • StateBackend   │
-│ • Compound Mini  │    │ • AGENTS.md File │     │ • Filesystem     │
-│ • GPT-5.4 / 5.5  │    │ • Skills on Disk │     │ • StoreBackend   │
-│                  │    │ • LangGraph Saver│     │                  │
-└──────────────────┘    └──────────────────┘     └──────────────────┘
-                                  │
-                                  ▼
-                       ┌─────────────────────────────────────┐
-                       │    Autonomous Subagent Delegation   │
-                       └──────────┬──────────────────────────┘
-                                  │
-                 ┌────────────────┴────────────────┐
-                 ▼                                 ▼
-      ┌─────────────────────┐           ┌─────────────────────┐
-      │  Light Researcher   │           │   Deep Researcher   │
-      │ • Fast factual look-│           │ • Exhaustive search │
-      │   ups & brief ans.  │           │ • Multi-angle verif.│
-      │ • Concise synthesis │           │ • Pydantic Output:  │
-      │                     │           │   ResearchFindings  │
-      └─────────────────────┘           └─────────────────────┘
+                         ┌─────────────────────────────────────────┐
+                         │    Streamlit UI — 3 Tabs                │
+                         │   💬 Chat  │  📄 Resume  │  🔍 Jobs    │
+                         └──────────────────┬──────────────────────┘
+                                            │
+                         ┌──────────────────┴──────────────────────┐
+                         │         Agent Factory + Router          │
+                         │     (General Mode / Career Mode)        │
+                         └──────────────────┬──────────────────────┘
+                                            │
+          ┌─────────────────────────────────┼─────────────────────────────────┐
+          │                                 │                                 │
+          ▼                                 ▼                                 ▼
+┌───────────────────┐           ┌───────────────────┐            ┌───────────────────┐
+│   3 LLM Engines   │           │  Context Layer     │            │  Storage Layer    │
+│                   │           │                   │            │                   │
+│ • Qwen 3.8 27B    │           │ • Career Copilot  │            │ • StateBackend    │
+│   (orchestrate)   │           │   System Prompt   │            │ • FilesystemBack. │
+│ • Gemini 3.8 Flash│           │ • ATS Resume Skill│            │ • StoreBackend    │
+│   (fast rewrite)  │           │ • Interview Skill │            │ • LangGraph Saver │
+│ • Gemma 4 31B     │           │ • AGENTS.md       │            │                   │
+│   (doc parsing)   │           │ • Thread Memory   │            │                   │
+└───────────────────┘           └───────────────────┘            └───────────────────┘
+                                            │
+              ┌─────────────────────────────┼────────────────────────────┐
+              │            Career Subagent Pipeline                      │
+              └─────────────────────────────┼────────────────────────────┘
+                                            │
+     ┌──────────┬──────────┬────────────┬───┴────────┐
+     ▼          ▼          ▼            ▼            ▼
+┌─────────┐┌─────────┐┌──────────┐┌──────────┐┌───────────┐
+│   JD    ││ Resume  ││  Job     ││Interview ││ Quality   │
+│Analyzer ││ Tailor  ││  Scout   ││  Coach   ││  Judge    │
+│         ││         ││          ││          ││           │
+│Qwen 3.8 ││Gemini   ││Gemini    ││Gemini    ││Qwen 3.8  │
+│  27B    ││3.8 Flash││3.8 Flash ││3.8 Flash ││  27B     │
+│         ││         ││          ││          ││           │
+│JDAnalysis│TailoredR.│JobSearch  │Interview  │QualityVer.│
+│(14 flds)││(8 flds) ││Results   ││  Prep    ││  dict    │
+└─────────┘└─────────┘└──────────┘└──────────┘└───────────┘
 ```
 
 ---
 
 ## ⚡ System Capabilities
 
-### 1. Model Engine Selection
-- **Qwen 3.8-27B (Groq)** — Default lightning-fast open-weights reasoning model.
-- **Groq Compound Mini** — High-efficiency model optimized for low-latency agent loops.
-- **GPT-5.4 & GPT-5.5 (OpenAI)** — Advanced frontier models for complex multi-hop reasoning.
-- Transparent syntax normalization between `provider:model` and `provider/model` delimiters.
+### 1. General Chat Mode
 
-### 2. Context Engineering & Memory
-- **Curated System Prompts**: Toggle between General Assistant, Code Specialist, and Research Analyst profiles.
-- **`AGENTS.md` Memory**: Loads `/projects/AGENTS.md` as persistent system context guiding architectural conventions and runtime protocols.
-- **Modular Skills System**: Scans `/projects/skills/` for `SKILL.md` specifications (e.g., Python specialist, Report writer) and mounts them into the agent's virtual memory on demand.
-- **Thread Checkpointing**: Utilizes LangGraph `MemorySaver` to preserve conversation history across turns with unique thread IDs.
+The original conversational AI with:
+- **Two-tier research subagents** — Light Researcher (fast lookups) + Deep Researcher (structured `ResearchFindings`)
+- **Tavily web search** — real-time internet access
+- **Persistent memory** — LangGraph MemorySaver checkpointers
+- **Virtual filesystem** — read/write files during conversations
+- **Skills system** — load domain-specific instructions from disk
+- **Multiple context modes** — system prompts, AGENTS.md, Skills
 
-### 3. Pluggable Backends
-- **State Backend (`state`)**: Default in-memory ephemeral virtual filesystem carried within agent delta channels.
-- **Filesystem Backend (`filesystem`)**: Maps virtual workspace files directly to sandboxed local directories.
-- **Store Backend (`store`)**: Employs LangGraph's persistent KV-store protocol for cross-thread memory.
+### 2. Career Mode — Resume Tailor
 
-### 4. Two-Tier Autonomous Subagents
-The parent agent automatically delegates tasks using the `task` tool based on query depth:
-- **`light-researcher`**: Used for fast, brief lookups, fact verification, and quick summaries without heavy multi-step loops.
-- **`deep-researcher`**: Dedicated in-depth researcher that synthesizes multi-source findings into a validated **Pydantic schema**:
-  ```python
-  class ResearchFindings(BaseModel):
-      summary: str       # Comprehensive synthesis of findings
-      key_points: list   # Key takeaways and discovered evidence
-      sources: list      # URLs and documents consulted
-      confidence: float  # Score from 0.0 to 1.0 reflecting evidence strength
-  ```
+The flagship feature. A 7-step pipeline:
 
-### 5. Modern Conversational Web UI
-- **Obsidian Dark Theme**: Cosmic dark gradient (`#08090e`) with ambient violet/rose glows and glassmorphic panels (`backdrop-filter: blur(28px)`).
-- **Typography**: Refined fonts powered by **Plus Jakarta Sans** and **JetBrains Mono**.
-- **Real-Time Telemetry Bar**: Pinned status indicator showing live model engine, active backend, subagent tier, and search status.
-- **Interactive Starter Cards**: Clickable suggestion cards to instantly launch deep research, code planning, fact checks, or file creation tasks.
-- **Tool Inspection Drawers**: Expandable cards revealing underlying tool execution arguments and file modification previews.
+| Step | What Happens | Agent Used |
+|---|---|---|
+| 1. Parse Resume | Extract text from PDF/DOCX/TXT/MD | `resume_parser` tool |
+| 2. Extract JD | Scrape URL (LinkedIn/Naukri/Indeed) or process pasted text | `job_extractor` tool |
+| 3. Analyse JD | Deep extraction of skills, keywords, tech stack, flags | JD Analyzer (Qwen 3.8 27B) |
+| 4. GitHub Data | Fetch repos, languages, stars → resume bullet points | `github_analyzer` tool |
+| 5. Tailor Resume | Rewrite bullets (Google XYZ), maximise ATS keywords | Resume Tailor (Gemini 3.8 Flash) |
+| 6. Quality Check | Hallucination detection, ATS compliance, completeness | Quality Judge (Qwen 3.8 27B) |
+| 7. Export | Preview + download as PDF, DOCX, or Markdown | `resume_exporter` tool |
+
+### 3. Career Mode — Job Search
+
+- Search across **LinkedIn, Naukri, Indeed, Greenhouse, Lever, Wellfound**
+- **3-day freshness filter** — only recent postings
+- **Fit scoring** — Hard Skills (40%) + Experience (30%) + Domain (20%) + Stack (10%)
+- Results with direct **apply links**
+- Download results for offline review
+
+### 4. Career Mode — Interview Coach
+
+- Company research (tech stack, engineering blog, Glassdoor)
+- 8–10 technical questions tailored to the role
+- 5 behavioral questions with **STAR method** answer angles
+- 3 system design topics based on company products
+- **4-week study plan** (fundamentals → company-specific → mock interviews)
+- Salary negotiation tips
+
+### 5. Multi-Model Routing
+
+Each task is routed to the optimal LLM:
+
+| Model | Provider | Role |
+|---|---|---|
+| **Qwen 3.8 27B** | OpenRouter (free) | Orchestration, deep JD analysis, quality judging, technical accuracy |
+| **Gemini 3.8 Flash** | Google AI Studio | Fast rewriting, interview prep, job search |
+| **Gemma 4 31B** | Google AI Studio | PDF/DOCX parsing, multimodal understanding |
 
 ---
 
@@ -134,133 +162,150 @@ The parent agent automatically delegates tasks using the `task` tool based on qu
 
 ```text
 deep_agents/
-├── app.py                          # Streamlit modern conversational AI application
-├── requirements.txt                # Production dependency manifest
-├── pyproject.toml                  # Python package configuration (uv-compatible)
-├── README.md                       # Complete documentation & deployment guide
-├── .gitignore                      # Git ignore rules (protects .env & secrets)
+├── app.py                              # Streamlit app — 3 tabs (Chat, Resume, Jobs)
+├── requirements.txt                    # Production dependencies
+├── pyproject.toml                      # Package config (v2.0)
+├── packages.txt                        # System deps for Streamlit Cloud (WeasyPrint)
+├── .env                                # API keys (gitignored)
+├── README.md                           # This file
+├── CAREER_MODE.md                      # Career Mode technical documentation
 │
-├── src/
-│   └── deep_agents/
-│       ├── __init__.py             # Public API exports
-│       ├── config.py               # Environment loader (.env + st.secrets) & model map
-│       ├── agents/
-│       │   ├── __init__.py         # Agents package init
-│       │   ├── factory.py          # Unified create_agent_instance graph builder
-│       │   └── subagents.py        # Two-tier light & deep structured subagents
-│       ├── backends/
-│       │   ├── __init__.py         # Backends package init
-│       │   └── factory.py          # State, Filesystem, and Store backend factory
-│       ├── context/
-│       │   ├── __init__.py         # Context package init
-│       │   ├── memory.py           # LangGraph checkpointers & thread utilities
-│       │   ├── prompts.py          # System prompt templates & AGENTS.md reader
-│       │   └── skills.py           # SKILL.md file loader & virtual tree generator
-│       └── tools/
-│           ├── __init__.py         # Tools package init
-│           └── search.py           # Tavily web search tool factory
+├── src/deep_agents/
+│   ├── __init__.py
+│   ├── config.py                       # 4 models, MODEL_ROLES, env loader
+│   │
+│   ├── agents/
+│   │   ├── __init__.py                 # All agent exports
+│   │   ├── factory.py                  # create_agent_instance() graph builder
+│   │   └── subagents.py               # 2 research + 5 career subagents
+│   │
+│   ├── backends/
+│   │   ├── __init__.py
+│   │   └── factory.py                  # State, Filesystem, Store backends
+│   │
+│   ├── context/
+│   │   ├── __init__.py
+│   │   ├── memory.py                   # LangGraph checkpointer + thread utils
+│   │   ├── prompts.py                  # System prompts + CAREER_COPILOT_PROMPT
+│   │   └── skills.py                   # SKILL.md loader
+│   │
+│   └── tools/
+│       ├── __init__.py                 # All tool exports
+│       ├── search.py                   # web_search + job_search tools
+│       ├── resume_parser.py            # PDF/DOCX/TXT/MD → ResumeProfile
+│       ├── job_extractor.py            # URL/text → JobPosting
+│       ├── github_analyzer.py          # GitHub API → resume bullet points
+│       └── resume_exporter.py          # Markdown → PDF (WeasyPrint) + DOCX
 │
-├── projects/                       # Context engineering assets
-│   ├── AGENTS.md                   # Sample agent architecture & operating manual
-│   └── skills/                     # Skill directories mounted into agent filesystem
-│       ├── python/SKILL.md         # Python development skill
-│       └── report-writer/SKILL.md  # Structured markdown report skill
+├── projects/
+│   ├── AGENTS.md                       # Agent operating manual
+│   └── skills/
+│       ├── python/SKILL.md             # Python development skill
+│       ├── report-writer/SKILL.md      # Report writing skill
+│       ├── ats-resume/SKILL.md         # ATS resume optimisation rules
+│       └── interview-prep/SKILL.md     # Interview preparation framework
 │
-└── deep_agent_experiments/         # Source Jupyter exploratory notebooks
-    ├── 1-basicsdeepagent.ipynb     # Agent basics & tool invocation
-    ├── 2-contextengineering.ipynb  # Memory, AGENTS.md & skill files
-    ├── 3-backends.ipynb            # State, Filesystem & Store backends
-    └── 4-subagents.ipynb           # Declarative subagents & structured outputs
+└── deep_agent_experiments/             # Original Jupyter notebooks
+    ├── 1-basicsdeepagent.ipynb
+    ├── 2-contextengineering.ipynb
+    ├── 3-backends.ipynb
+    └── 4-subagents.ipynb
 ```
 
 ---
 
 ## 💻 Local Installation & Setup
 
-### 1. Prerequisites
-- **Python 3.11+** installed.
-- [uv](https://github.com/astral-sh/uv) (recommended) or standard `pip` / `venv`.
+### Prerequisites
+- **Python 3.11+**
+- [uv](https://github.com/astral-sh/uv) (recommended) or `pip`
 
-### 2. Clone the Repository
+### Install
+
 ```bash
 git clone https://github.com/Viplove0114/deep_agents.git
 cd deep_agents
-```
 
-### 3. Create & Activate Virtual Environment
-Using `uv`:
-```bash
-uv venv
-.venv\Scripts\activate      # On Windows
-# source .venv/bin/activate # On macOS / Linux
+# Using uv (recommended)
+uv venv && .venv\Scripts\activate
 uv pip install -r requirements.txt
-```
 
-Or using standard `venv`:
-```bash
-python -m venv .venv
-.venv\Scripts\activate      # On Windows
-# source .venv/bin/activate # On macOS / Linux
+# Or using pip
+python -m venv .venv && .venv\Scripts\activate
 pip install -r requirements.txt
 ```
 
-### 4. Configure Environment Variables
-Create a `.env` file in the root directory:
+### Configure API Keys
+
+Create `.env` in the project root:
+
 ```env
-# Primary fast model provider
-GROQ_API_KEY=your_groq_api_key_here
+# Required — at least one model provider
+GOOGLE_API_KEY=your_google_ai_studio_key
+OPENROUTER_API_KEY=your_openrouter_key
 
-# Optional frontier model provider
-OPENAI_API_KEY=your_openai_api_key_here
-
-# Web search tool provider
-TAVILY_API_KEY=your_tavily_api_key_here
+# Required — for web search and job search
+TAVILY_API_KEY=your_tavily_key
 ```
 
-### 5. Launch the Web Application
+| Key | Where to Get It | Cost |
+|---|---|---|
+| `GOOGLE_API_KEY` | [aistudio.google.dev](https://aistudio.google.dev/) | Free tier |
+| `OPENROUTER_API_KEY` | [openrouter.ai/keys](https://openrouter.ai/keys) | Free models available |
+| `TAVILY_API_KEY` | [tavily.com](https://tavily.com/) | 1000 free searches/month |
+
+### Launch
+
 ```bash
 streamlit run app.py
 ```
-Open your browser to **`http://localhost:8501`**.
+
+Open **`http://localhost:8501`** → you'll see three tabs: Chat, Resume Tailor, Job Search.
 
 ---
 
 ## ☁️ Streamlit Cloud Deployment
 
-The application is natively configured to run on **Streamlit Community Cloud** without committing secret keys or `.env` files:
-
-1. **Fork or Push** your repository to GitHub (ensure `.env` is omitted; our `.gitignore` protects it automatically).
-2. Visit **[share.streamlit.io](https://share.streamlit.io)** and connect your GitHub account.
-3. Click **"New App"**:
-   - **Repository**: `YourUsername/deep_agents`
-   - **Branch**: `main`
-   - **Main file path**: `app.py`
-4. Expand **Advanced Settings → Secrets** and insert your API keys in TOML format:
+1. Push to GitHub (`.env` is gitignored).
+2. Go to [share.streamlit.io](https://share.streamlit.io) → **New App**.
+3. Set `app.py` as the main file.
+4. Under **Advanced Settings → Secrets**, add:
    ```toml
-   GROQ_API_KEY = "gsk_..."
-   OPENAI_API_KEY = "sk-..."
+   GOOGLE_API_KEY = "your_key"
+   OPENROUTER_API_KEY = "your_key"
    TAVILY_API_KEY = "tvly-..."
    ```
-5. Click **Deploy**. The app will launch with live telemetry, subagent delegation, and search enabled.
+5. The `packages.txt` file auto-installs WeasyPrint system dependencies.
 
-🔗 **Live Deployment:** [https://viplove0114-deep-agents-app-bdkxjk.streamlit.app/](https://viplove0114-deep-agents-app-bdkxjk.streamlit.app/)
+🔗 **Live:** [https://viplove0114-deep-agents-app-bdkxjk.streamlit.app/](https://viplove0114-deep-agents-app-bdkxjk.streamlit.app/)
+
+---
+
+## 📄 Career Mode Deep Dive
+
+For comprehensive technical documentation of the Career Intelligence Suite, including:
+- Design rationale for each component
+- Model routing decisions
+- Anti-hallucination protocol details
+- ATS template design choices
+- Pydantic schema documentation
+
+See **[CAREER_MODE.md](CAREER_MODE.md)**.
 
 ---
 
 ## 🔬 Notebook Experiments Reference
 
-The `deep_agent_experiments/` directory preserves the initial research and prototypes:
-
-| Notebook | Topic | Refactored Destination |
-| :--- | :--- | :--- |
-| `1-basicsdeepagent.ipynb` | Deep agent initialization, basic system prompts, internet search | `src/deep_agents/tools/search.py`, `src/deep_agents/config.py` |
-| `2-contextengineering.ipynb` | Multi-turn memory, LangGraph checkpointers, `AGENTS.md`, and skills | `src/deep_agents/context/prompts.py`, `memory.py`, `skills.py` |
-| `3-backends.ipynb` | Comparing `StateBackend`, `FilesystemBackend`, and `StoreBackend` | `src/deep_agents/backends/factory.py` |
-| `4-subagents.ipynb` | Subagent declaration, model routing, and Pydantic structured output | `src/deep_agents/agents/subagents.py`, `factory.py` |
+| Notebook | Topic | Refactored To |
+|---|---|---|
+| `1-basicsdeepagent.ipynb` | Agent basics, tool invocation | `tools/search.py`, `config.py` |
+| `2-contextengineering.ipynb` | Memory, AGENTS.md, skills | `context/prompts.py`, `memory.py`, `skills.py` |
+| `3-backends.ipynb` | State, Filesystem, Store backends | `backends/factory.py` |
+| `4-subagents.ipynb` | Subagent declaration, structured output | `agents/subagents.py`, `factory.py` |
 
 ---
 
-## 👤 Author & License
+## 👤 License & Author
 
 - **Author**: Viplove Thakran ([@Viplove0114](https://github.com/Viplove0114))
 - **Email**: viplovethakran4@gmail.com
